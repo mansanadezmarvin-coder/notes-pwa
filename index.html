@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Resume Builder — Mobile</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#06b6d4">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="icon-192.svg">
+</head>
+<body>
+  <header class="app-header" style="padding:12px 16px;display:flex;align-items:center;gap:12px;">
+    <div style="flex:1;font-weight:700">ResuMatch — Mobile</div>
+    <button id="nav-preview" class="secondary">Preview</button>
+    <button id="btn-install" class="secondary" style="display:none;margin-left:8px">Install</button>
+  </header>
+
+  <main class="container" style="max-width:780px;padding:10px;grid-template-columns:1fr;">
+    <section class="builder" aria-labelledby="builder-heading">
+      <h1 id="builder-heading">Resume Builder</h1>
+      <form id="resume-form">
+        <!-- Personal Info (same IDs as main app so shared JS works) -->
+        <fieldset class="card">
+          <legend>Personal Information</legend>
+          <label for="name">Full name</label>
+          <input type="text" id="name" name="name" placeholder="Jane Doe" />
+
+          <label for="title">Professional title</label>
+          <input type="text" id="title" name="title" placeholder="Software Engineer" />
+
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="jane@example.com" />
+
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" name="phone" placeholder="(555) 555-5555" />
+
+          <label for="citycountry">City / Country</label>
+          <input type="text" id="citycountry" name="citycountry" placeholder="City, Country" />
+
+          <label for="profileImage">Profile photo</label>
+          <input type="file" id="profileImage" name="profileImage" accept="image/*" />
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>Summary</legend>
+          <label for="summary">Profile summary</label>
+          <textarea id="summary" name="summary" rows="4" placeholder="Brief professional summary"></textarea>
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>Skills</legend>
+          <label for="skills">Skills <span class="helper">(comma separated)</span></label>
+          <input id="skills" name="skills" placeholder="JavaScript, Python, React" />
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>Experience</legend>
+          <label for="experience">Experience <span class="helper">(one per line)</span></label>
+          <textarea id="experience" name="experience" rows="4" placeholder="Company • Role • Years"></textarea>
+        </fieldset>
+
+        <div class="actions">
+          <button type="button" id="update" class="primary">Update Preview</button>
+          <button type="button" id="export" class="secondary">Export to PDF</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="preview-wrap" aria-labelledby="preview-heading" id="mobile-preview" style="display:none;margin-top:8px;">
+      <h2 id="preview-heading">Preview</h2>
+      <div id="resume-preview" class="resume" role="region" aria-live="polite">
+        <header class="resume-header">
+          <div class="profile-photo" aria-hidden="true">
+            <img id="pv-photo" src="" alt="Profile photo" />
+          </div>
+          <div class="name-block">
+            <h1 id="pv-name">Your Name</h1>
+            <div id="pv-title" class="muted">Your Title</div>
+          </div>
+        </header>
+
+        <section id="sec-summary" class="resume-section">
+          <h3>Summary</h3>
+          <p id="pv-summary">A short professional summary.</p>
+        </section>
+
+        <section id="sec-skills" class="resume-section">
+          <h3>Skills</h3>
+          <div id="pv-skills" class="skills"></div>
+        </section>
+
+        <section id="sec-experience" class="resume-section">
+          <h3>Experience</h3>
+          <ul id="pv-experience" class="experience-list"></ul>
+        </section>
+      </div>
+
+      <div id="recommended-jobs" class="card recommended-jobs" aria-live="polite">
+        <h3>Recommended Jobs</h3>
+        <div id="jobs-list">
+          <p class="muted">Suggestions will appear here based on the resume content.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="mobile-nav" style="position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;padding:10px;background:#fff;border-top:1px solid rgba(15,23,42,0.04);">
+    <button id="btn-form" class="secondary" style="flex:1;padding:12px">Form</button>
+    <button id="btn-preview" class="secondary" style="flex:1;padding:12px">Preview</button>
+    <button id="btn-export" class="primary" style="flex:1;padding:12px">Export</button>
+  </nav>
+
+  <script src="../js/script.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Register service worker for PWA install (requires HTTPS or localhost)
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('./service-worker.js').catch(e=>console.warn('SW register failed', e))
+    }
+
+    // Install prompt handling: show `#btn-install` when available
+    let deferredPrompt
+    const btnInstall = document.getElementById('btn-install')
+    window.addEventListener('beforeinstallprompt', (e)=>{
+      e.preventDefault(); deferredPrompt = e; if(btnInstall){ btnInstall.style.display = '' }
+    })
+    if(btnInstall){ btnInstall.addEventListener('click', async ()=>{
+      if(!deferredPrompt) return
+      deferredPrompt.prompt()
+      const choice = await deferredPrompt.userChoice
+      deferredPrompt = null
+      btnInstall.style.display = 'none'
+    }) }
+  </script>
+</body>
+</html>
